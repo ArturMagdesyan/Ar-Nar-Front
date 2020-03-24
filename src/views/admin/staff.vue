@@ -175,7 +175,7 @@
         },
         { text: "Actions", value: "action", align: "center", sortable: false }
       ],
-      roles: ['CREATED', 'UPDATED', "DELETED", "READ_STAFF", "ALL"],
+      roles: ['CREATED', 'UPDATED', "DELETED","ONLY_STAFF", "READ_STAFF", "ALL"],
       editedIndex: -1,
       staff: {
         firstName: "",
@@ -250,6 +250,7 @@
       close() {
         this.dialog = false;
         setTimeout(() => {
+          this.$refs.formStaff.reset();
           this.staff = _.cloneDeep(this.defaultStaff);
           this.editedIndex = -1;
         }, 300);

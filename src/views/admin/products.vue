@@ -12,7 +12,7 @@
         <v-toolbar flat color="white">
           <v-toolbar-title>Product</v-toolbar-title>
           <v-row class="ml-2">
-            <v-col cols="4">
+            <v-col cols="3">
               <v-select
                 v-model="filter.categoryId"
                 :items="categories"
@@ -22,7 +22,7 @@
                 @change="filtered(), getFilterSubCategory()"
               ></v-select>
             </v-col>
-            <v-col cols="4">
+            <v-col cols="3">
               <v-select
                 v-model="filter.subCategoryId"
                 :items="subCategories"
@@ -32,15 +32,22 @@
                 @change="filtered()"
               ></v-select>
             </v-col>
-            <v-col cols="4">
+            <v-col cols="3">
               <v-select
                 v-model="filter.byOrder"
                 :items="byOrder"
                 item-text="name"
                 item-value="id"
-                label="Filter is Order"
+                label="Filter is order"
                 @change="filtered()"
               ></v-select>
+            </v-col>
+            <v-col cols="3">
+              <v-text-field
+              v-model="filter.productCode"
+              label="Filter product code"
+              @change="filtered()"
+              ></v-text-field>
             </v-col>
           </v-row>
           <div class="ml-2">
@@ -127,13 +134,13 @@
                     </v-col>
                     <v-col cols="4">
                       <v-select
-                        v-model="product.color"
-                        :items="colors"
-                        :item-text="`${languageLocale}.name`"
-                        item-value="_id"
-                        label="Select color"
-                        multiple
-                        :rules="[v => (v && v.length >= 1) || 'Color is required']"
+                        v-model="product.byOrder"
+                        :items="byOrder"
+                        item-text="name"
+                        item-value="id"
+                        label="Select is order"
+                        persistent-hint
+                        single-line
                       ></v-select>
                     </v-col>
                   </v-row>
@@ -150,7 +157,7 @@
                     </v-col>
                   </v-row>
                   <v-row>
-                    <v-col cols="6">
+                    <v-col cols="5">
                       <v-select
                         v-model="product.categoryId"
                         :items="categories"
@@ -163,7 +170,7 @@
                         :rules="[v => !!v || 'Category is required']"
                       ></v-select>
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="5">
                       <v-select
                         v-model="product.subCategoryId"
                         :items="subCategories"
@@ -175,75 +182,115 @@
                         :rules="[v => !!v || 'Sub category is required']"
                       ></v-select>
                     </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col cols="6">
-                      <v-select
-                        v-model="product.byOrder"
-                        :items="byOrder"
-                        item-text="name"
-                        item-value="id"
-                        label="Select is order"
-                        persistent-hint
-                        single-line
-                      ></v-select>
-                    </v-col>
-                    <v-col cols="4" style="position: relative">
-                      <span v-if="product.price && product.percentOff" style="position: absolute; width: 80%; text-align: right; color: red">{{ getPricePercentOff() }}</span>
-                      <v-text-field
-                        v-model="product.price"
-                        label="Product price(AMD)"
-                        type="number"
-                        :rules="[v => !!v || 'Price is required']"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="2">
-                      <v-text-field
-                        v-model="product.percentOff"
-                        label="Percent off"
-                        type="number"
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                  <v-row v-if="product.byOrder == 1">
-                    <v-col cols="3">
-                      <span v-if="product.onlyQuantity">Quantity</span>
-                      <span v-else>Quantity and size</span>
+                    <v-col cols="2" class="d-flex justify-center">
                       <v-switch v-model="product.onlyQuantity"></v-switch>
                     </v-col>
-                    <v-col cols="9">
-                      <v-text-field
-                        v-if="product.onlyQuantity"
-                        v-model="product.quantity"
-                        label="Product quantity"
-                        type="number"
-                        :rules="[v => !!v || 'Quantity is required']"
-                      ></v-text-field>
-                      <div v-else class="quantitySize">
-                        <v-row v-for="(quantitySize, i) of product.quantitySize" :key="i">
-                          <v-col cols="5">
-                            <v-text-field
-                              v-model.number="quantitySize.quantity"
-                              label="Product quantity"
-                              type="number"
-                            ></v-text-field>
-                          </v-col>
-                          <v-col cols="5">
-                            <v-text-field
-                              v-model="quantitySize.size"
-                              label="Product size"
-                            ></v-text-field>
-                          </v-col>
-                          <v-col cols="2">
-                              <v-btn class="mx-2" small color="error" @click="deleteRow(i)">
-                                <v-icon>mdi-delete</v-icon>
-                              </v-btn>
-                            <v-btn v-if="i === product.quantitySize.length-1" class="mx-2" small color="success" @click="addNewRow()">
-                              <v-icon>mdi-plus</v-icon>
-                            </v-btn>
-                          </v-col>
-                        </v-row>
-                      </div>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12" v-if="product.onlyQuantity">
+                      <v-container class="text-center red--text">Quantity</v-container>
+                      <v-row v-for="(item, i) of product.bag" :key="i" class="bag-item">
+                        <v-col cols="8">
+                          <v-select
+                            v-model="item.colors"
+                            :items="colors"
+                            :item-text="`${languageLocale}.name`"
+                            item-value="_id"
+                            label="Select color"
+                            multiple
+                            :rules="[v => (v && v.length >= 1) || 'Color is required']"
+                          ></v-select>
+                        </v-col>
+                        <v-col cols="4">
+                          <v-text-field
+                            v-model.number="item.quantity"
+                            label="Product quantity"
+                            type="number"
+                            :rules="[v => !!v || 'Quantity is required']"
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="4" style="position: relative">
+                          <span v-if="item.price && item.percentOff" style="position: absolute; width: 80%; text-align: right; color: red">{{ getPricePercentOff(item.price, item.percentOff) }}</span>
+                          <v-text-field
+                            v-model="item.price"
+                            label="Product price(AMD)"
+                            type="number"
+                            :rules="[v => !!v || 'Price is required']"
+                            min="10"
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="4">
+                          <v-text-field
+                            v-model="item.percentOff"
+                            label="Percent off"
+                            type="number"
+                            min="0"
+                            max="90"
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="4" class="d-flex justify-end align-center">
+                          <v-btn class="mx-2" small color="error" @click="deleteRow(i)">
+                            <v-icon>mdi-delete</v-icon>
+                          </v-btn>
+                          <v-btn v-if="i === product.bag.length-1" class="mx-2" small color="success" @click="addNewRow()">
+                            <v-icon>mdi-plus</v-icon>
+                          </v-btn>
+                        </v-col>
+                      </v-row>
+                    </v-col>
+                    <v-col cols="12" v-if="!product.onlyQuantity">
+                      <v-container class="text-center red--text">Quantity & Size</v-container>
+                      <v-row v-for="(item, i) of product.bag" :key="i" class="bag-item wrap">
+                        <v-col cols="6">
+                          <v-select
+                            v-model="item.colors"
+                            :items="colors"
+                            :item-text="`${languageLocale}.name`"
+                            item-value="_id"
+                            label="Select color"
+                            multiple
+                            :rules="[v => (v && v.length >= 1) || 'Color is required']"
+                          ></v-select>
+                        </v-col>
+                        <v-col cols="3">
+                          <v-text-field
+                            v-model.number="item.quantity"
+                            label="Product quantity"
+                            type="number"
+                            :rules="[v => !!v || 'Quantity is required']"
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="3">
+                          <v-text-field
+                            v-model="item.size"
+                            label="Product size"
+                            :rules="[v => !!v || 'Size is required']"
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="4">
+                          <v-text-field
+                            v-model="item.price"
+                            label="Product price(AMD)"
+                            type="number"
+                            :rules="[v => !!v || 'Price is required']"
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="4">
+                          <v-text-field
+                            v-model="item.percentOff"
+                            label="Percent off"
+                            type="number"
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="4">
+                          <v-btn class="mx-2" small color="error" @click="deleteRow(i)">
+                            <v-icon>mdi-delete</v-icon>
+                          </v-btn>
+                          <v-btn v-if="i === product.bag.length-1" class="mx-2" small color="success" @click="addNewRow()">
+                            <v-icon>mdi-plus</v-icon>
+                          </v-btn>
+                        </v-col>
+                      </v-row>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -305,7 +352,7 @@ import Swal from "sweetalert2";
 import { isValidRole } from "../../helpers/roles";
 import { productHeader } from "../../helpers/dataTableHeaders";
 import ProductImages from '../../components/admin/productImages';
-import {languageFields,validateQuantityAndSize} from "../../helpers/validationRequestFild";
+import {languageFields} from "../../helpers/validationRequestFild";
 import {randomCode} from '../../helpers/randomCode';
 
 export default {
@@ -341,6 +388,7 @@ export default {
     }
     ],
     filter: {
+      productCode: '',
       categoryId: null,
       subCategoryId: null,
       byOrder: null
@@ -350,14 +398,18 @@ export default {
       categoryId: null,
       subCategoryId: null,
       byOrder: 1,
-      price: null,
-      percentOff: null,
       onlyQuantity: true,
-      quantity: null,
-      quantitySize: [{ quantity: null, size: ''}],
+      bag: [
+        {
+          percentOff: null,
+          price: null,
+          colors: [],
+          quantity: null,
+          size: ''
+        }
+      ],
       images: [],
       files: [],
-      color: [],
       hy: {
         name: '',
         description: '',
@@ -376,14 +428,19 @@ export default {
       categoryId: null,
       subCategoryId: null,
       byOrder: 1,
-      price: null,
-      percentOff: null,
       onlyQuantity: true,
-      quantity: null,
+      bag: [
+        {
+          percentOff: null,
+          price: null,
+          colors: [],
+          quantity: null,
+          size: ''
+        }
+      ],
       quantitySize: [{ quantity: null, size: ''}],
       images: [],
       files: [],
-      color: [],
       hy: {
         name: '',
         description: '',
@@ -461,6 +518,7 @@ export default {
 
       filterClear() {
         this.filter = {
+          productCode: '',
           category: null,
           subCategory: null,
           byOrder: null
@@ -495,20 +553,23 @@ export default {
       },
 
       addNewRow() {
-        const quantitySize = this.product.quantitySize[this.product.quantitySize.length - 1];
-        if (quantitySize.quantity && quantitySize.size) {
-          this.product.quantitySize.push({ quantity: null, size: ''})
+        const lastItem = this.product.bag[this.product.bag.length - 1];
+        if (this.product.onlyQuantity & lastItem.quantity > 0 && lastItem.colors.length > 0 && lastItem.price > 0) {
+          this.product.bag.push({ quantity: null, colors: [], price: null, percentOff: null});
+        }
+        if (!this.product.onlyQuantity & lastItem.quantity > 0 && lastItem.colors.length > 0 && lastItem.size  && lastItem.price > 0) {
+          this.product.bag.push({ quantity: null, colors: [], size: '', price: null, percentOff: null});
         }
       },
 
       deleteRow(index) {
-        if (this.product.quantitySize.length === 1) return
-        this.product.quantitySize.splice(index,1);
+        if (this.product.bag.length === 1) return;
+        this.product.bag.splice(index,1);
       },
 
-      getPricePercentOff() {
-        if (this.product.price && this.product.percentOff) {
-          return Math.ceil(this.product.price - (this.product.price * (this.product.percentOff / 100)));
+      getPricePercentOff(price, percentOff) {
+        if (price && percentOff) {
+          return Math.ceil(price - (price * (percentOff / 100)));
         }
       },
       // get sub category
@@ -622,17 +683,6 @@ export default {
           return;
         }
         if (!this.$refs.formProduct.validate()) return;
-        if (!this.product.onlyQuantity && this.product.byOrder == 1) {
-          const err = validateQuantityAndSize(this.product.quantitySize);
-          if(err) {
-            Swal.fire({
-              icon: "error",
-              title: "Edit product",
-              text: err
-            });
-            return;
-          }
-        }
         const formData = new FormData();
         if (this.product.files.length) {
           for (const file of this.product.files) {
@@ -672,17 +722,6 @@ export default {
           return;
         }
         if (!this.$refs.formProduct.validate()) return;
-        if (!this.product.onlyQuantity && this.product.byOrder == 1) {
-          const err = validateQuantityAndSize(this.product.quantitySize);
-          if(err) {
-            Swal.fire({
-              icon: "error",
-              title: "Edit product",
-              text: err
-            });
-            return;
-          }
-        }
         const formData = new FormData();
         if (this.product.files.length) {
           for (const file of this.product.files) {
@@ -733,5 +772,9 @@ export default {
       border: 2px solid red;
       border-radius: 50%;
     }
+  }
+  .bag-item {
+    border: 1px dashed red !important;
+    border-bottom: none !important;
   }
 </style>
