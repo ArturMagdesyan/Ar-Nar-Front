@@ -69,7 +69,7 @@
               >
               <v-card-title class="justify-lg-space-between">
                 <span class="headline">{{ formTitle }}</span>
-                <v-row class="justify-center">
+                <v-row class="justify-center" v-if="editedIndex === -1">
                   <v-col cols="6">
                     <v-text-field
                       v-model="product.productCode"
@@ -80,6 +80,9 @@
                   <v-col cols="4" class="d-flex align-center">
                     <v-btn @click="productRandomCode()" small color="success">Random code</v-btn>
                   </v-col>
+                </v-row>
+                <v-row class="justify-center" v-else>
+                  <span class="red--text">Code: {{ product.productCode }}</span>
                 </v-row>
                 <div class="language-locale">
                   <div
@@ -137,10 +140,9 @@
                         v-model="product.byOrder"
                         :items="byOrder"
                         item-text="name"
-                        item-value="id"
+                        :item-value="`id`"
                         label="Select is order"
-                        persistent-hint
-                        single-line
+                        :rules="[v => !!v || 'By order is required']"
                       ></v-select>
                     </v-col>
                   </v-row>
@@ -165,8 +167,6 @@
                         :item-value="`_id`"
                         label="Select category"
                         @change="getSubCategory(product.categoryId)"
-                        persistent-hint
-                        single-line
                         :rules="[v => !!v || 'Category is required']"
                       ></v-select>
                     </v-col>
@@ -177,8 +177,6 @@
                         :item-text="`${languageLocale}.name`"
                         :item-value="`_id`"
                         label="Select sub category"
-                        persistent-hint
-                        single-line
                         :rules="[v => !!v || 'Sub category is required']"
                       ></v-select>
                     </v-col>
@@ -189,16 +187,16 @@
                   <v-row>
                     <v-col cols="12" v-if="product.onlyQuantity">
                       <v-container class="text-center red--text">Quantity</v-container>
-                      <v-row v-for="(item, i) of product.bag" :key="i" class="bag-item">
+                      <v-row v-for="(item, i) of product.bag" :key="i" class="bag-item" :class="{'border-bottom-none': product.bag.length - 1  === i}">
                         <v-col cols="8">
                           <v-select
                             v-model="item.colors"
                             :items="colors"
                             :item-text="`${languageLocale}.name`"
-                            item-value="_id"
+                            :item-value="`_id`"
                             label="Select color"
                             multiple
-                            :rules="[v => (v && v.length >= 1) || 'Color is required']"
+                            :rules="[v => !!v || 'Color is required']"
                           ></v-select>
                         </v-col>
                         <v-col cols="4">
@@ -240,16 +238,15 @@
                     </v-col>
                     <v-col cols="12" v-if="!product.onlyQuantity">
                       <v-container class="text-center red--text">Quantity & Size</v-container>
-                      <v-row v-for="(item, i) of product.bag" :key="i" class="bag-item wrap">
+                      <v-row v-for="(item, i) of product.bag" :key="i" class="bag-item wrap" :class="{'border-bottom-none': product.bag.length - 1  === i}">
                         <v-col cols="6">
                           <v-select
-                            v-model="item.colors"
+                            v-model="item.colorId"
                             :items="colors"
                             :item-text="`${languageLocale}.name`"
                             item-value="_id"
                             label="Select color"
-                            multiple
-                            :rules="[v => (v && v.length >= 1) || 'Color is required']"
+                            :rules="[v => !!v || 'Color is required']"
                           ></v-select>
                         </v-col>
                         <v-col cols="3">
@@ -340,7 +337,7 @@
     </div>
     <!-- images modal-->
     <v-dialog v-model="modalImages" fullscreen hide-overlay transition="dialog-bottom-transition">
-      <ProductImages :product="product" :closeImageDialog="closeImageDialog"></ProductImages>
+      <ProductImages :colors="colors" :product="product" :closeImageDialog="closeImageDialog"></ProductImages>
     </v-dialog>
   </div>
 </template>
@@ -362,7 +359,7 @@ export default {
   },
   data: () => ({
     pagination: {
-      perPage: 5,
+      perPage: 10,
       page: 1,
       length: 1
     },
@@ -374,7 +371,7 @@ export default {
     products: [],
     categories: [],
     subCategories: [],
-    subCategoriesTable: [],
+    subCategoriesForTable: [],
     editedIndex: -1,
     subCategory: [],
     colors: [],
@@ -397,7 +394,7 @@ export default {
       productCode: '',
       categoryId: null,
       subCategoryId: null,
-      byOrder: 1,
+      byOrder: null,
       onlyQuantity: true,
       bag: [
         {
@@ -427,7 +424,7 @@ export default {
       productCode: '',
       categoryId: null,
       subCategoryId: null,
-      byOrder: 1,
+      byOrder: null,
       onlyQuantity: true,
       bag: [
         {
@@ -438,7 +435,6 @@ export default {
           size: ''
         }
       ],
-      quantitySize: [{ quantity: null, size: ''}],
       images: [],
       files: [],
       hy: {
@@ -491,7 +487,8 @@ export default {
         })
       });
       Api.get(`/subCategories`).then(res => {
-        this.subCategoriesTable = res;
+        this.subCategoriesForTable = res;
+        this.subCategories = res;
       }).catch(err => {
         Swal.fire({
           icon: 'error',
@@ -574,6 +571,7 @@ export default {
       },
       // get sub category
       getSubCategory(categoryId) {
+        this.product.subCategoryId = null;
         Api.get(`/subCategories/${categoryId}`).then(res => {
           this.subCategories = res;
         }).catch(err => {
@@ -609,7 +607,7 @@ export default {
       },
 
       getSubCategoryTableName(id) {
-        for (const subCategory of this.subCategoriesTable) {
+        for (const subCategory of this.subCategoriesForTable) {
           if (subCategory._id === id)
             return subCategory[this.$store.state.language].name;
         }
@@ -774,7 +772,9 @@ export default {
     }
   }
   .bag-item {
-    border: 1px dashed red !important;
+    border-bottom: 1px dashed red !important;
+  }
+  .border-bottom-none {
     border-bottom: none !important;
   }
 </style>

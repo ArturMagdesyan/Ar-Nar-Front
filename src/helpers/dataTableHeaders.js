@@ -44,10 +44,10 @@ const productHeader = [
     value: `subCategory`
   },
   {
-    text: "Price",
+    text: "Product code",
     align: "center",
-    sortable: true,
-    value: `price`
+    sortable: false,
+    value: `productCode`
   },
   { text: "Actions", value: "action", align: "center", sortable: false }
 ];

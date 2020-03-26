@@ -35,11 +35,23 @@
           <div class="upload-container" v-if="product.images.length">
             <h4 class="title">Product images</h4>
             <div class="view-image" v-for="(image, i) of product.images" :key="i">
-              <span class="base-image" @click="imageBase(product._id, image._id, i)">
-                <v-icon v-if="image.base" color='success'>mdi-checkbox-marked-circle</v-icon>
-              </span>
-              <span class="delete-upload-image" @click="deleteProductImage(product._id ,image._id, i)">X</span>
-              <img :src="`${base_image}${image.name}`" alt="">
+              <div>
+                <span class="base-image" @click="imageBase(product._id, image._id, image.bagItemId)">
+                  <v-icon v-if="image.base" color='success'>mdi-checkbox-marked-circle</v-icon>
+                </span>
+                <span class="delete-upload-image" @click="deleteProductImage(product._id ,image._id, i)">X</span>
+                <img :src="`${base_image}${image.name}`" alt="">
+              </div>
+              <div>
+                <v-select
+                  v-model="image.bagItemId"
+                  @change="setImageColor(product._id, image._id, image.bagItemId)"
+                  :items="imagesColors"
+                  :item-text="`.name`"
+                  item-value="_id"
+                  label="Select color"
+                ></v-select>
+              </div>
             </div>
           </div>
         </v-container>
@@ -50,37 +62,67 @@
 <script>
 import _ from 'lodash'
 import { ImageAPi } from "../../../base_url/index";
-import APi from '../../../api/index';
+import API from '../../../api/index';
 import Swal from 'sweetalert2';
+import { getImagesColors } from '../../helpers/imagesColors';
 
 export default {
   name: "productImages",
   props: {
     product: Object,
-    closeImageDialog: Function
+    closeImageDialog: Function,
+    colors: Array
   },
 
   data: () => ({
     base_image: ImageAPi,
-    imagesUploads: []
+    imagesUploads: [],
+    imagesColors: [],
   }),
 
-  computed: {},
+  created() {
+    this.imagesColors = getImagesColors(this.product.bag, this.colors, this.$store.state.language);
+  },
 
   watch: {
     'product.images.length': function () {
       this.imagesUploads = [];
+    },
+    'product._id': function () {
+      if(_.get(this.product, '_id')) {
+        this.imagesColors = getImagesColors(this.product.bag, this.colors, this.$store.state.language);
+      }
+
     }
   },
 
   methods: {
-    imageBase(productId, imageId, index) {
-      this.product.images.forEach((image) => {
-        if (image._id === imageId) return image.base = true;
-          image.base = false;
-      });
+    setImageColor(productId, imageId, bagItemId) {
+      API.put(`/product/image-color/${productId}/${imageId}/${bagItemId}`).then(res => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Product image color',
+        })
+      }).catch(err => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Product image color',
+          text: err.message,
+        })
+      })
+    },
+
+    imageBase(productId, imageId, bagItemId) {
+      if (_.isNil(bagItemId)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Select image color',
+        });
+        return;
+      };
       confirm("Are you sure you want to base this image?") &&
-        APi.put(`/product/image/${productId}/${imageId}`).then( res => {
+      API.put(`/product/image-base/${productId}/${imageId}/${bagItemId}`).then( res => {
+        this.product.images = _.get(res,'data.images');
           Swal.fire({
             icon: 'success',
             title: 'Base image',
@@ -93,9 +135,10 @@ export default {
           })
         })
     },
+
     deleteProductImage(productId, imageId, index) {
       confirm("Are you sure you want to delete this image?") &&
-        APi.delete(`/product/image/${productId}/${imageId}`).then( res => {
+      API.delete(`/product/image-delete/${productId}/${imageId}`).then( res => {
           this.product.images.splice(index, 1);
           Swal.fire({
             icon: 'success',
@@ -109,18 +152,22 @@ export default {
           })
       })
     },
+
     deletedAllUploads() {
       this.product.files = [];
       this.imagesUploads = [];
       this.closeImageDialog();
     },
+
     deleteUploadImage(index) {
       this.product.files.splice(index,1);
       this.imagesUploads.splice(index,1);
     },
+
     clickFileInput(){
       document.getElementById('imageUpload').click();
     },
+
     viewImages(e) {
       const inputFiles = document.getElementById("imageUpload");
       for (let i = 0; i <= inputFiles.files.length - 1; i++) {
@@ -132,6 +179,7 @@ export default {
         reader.readAsDataURL(inputFiles.files[i]);
       }
     }
+
   },
 }
 </script>
@@ -162,8 +210,9 @@ export default {
           width: 10%;
           margin-right: 10px;
           display: flex;
+          flex-wrap: wrap;
           justify-content: center;
-          align-items: center;
+          align-items: flex-end;
           position: relative;
           .delete-upload-image {
             position: absolute;
