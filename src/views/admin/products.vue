@@ -129,21 +129,11 @@
                     </v-col>
                   </v-row>
                   <v-row>
-                    <v-col cols="8">
+                    <v-col cols="12">
                       <v-text-field
                         v-model.string="product[languageLocale].name"
                         :label="`Product name(${languageLocale})`"
                       ></v-text-field>
-                    </v-col>
-                    <v-col cols="4">
-                      <v-select
-                        v-model="product.byOrder"
-                        :items="byOrder"
-                        item-text="name"
-                        :item-value="`id`"
-                        label="Select is order"
-                        :rules="[v => !!v || 'By order is required']"
-                      ></v-select>
                     </v-col>
                   </v-row>
                   <v-row>
@@ -156,6 +146,28 @@
                         rows="2"
                         row-height="20"
                       ></v-textarea>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="4">
+                      <v-select
+                        v-model="product.genderId"
+                        :items="gender"
+                        :item-text="`name`"
+                        :item-value="`id`"
+                        label="Select gender"
+                        :rules="[v => !!v || 'Gender is required']"
+                      ></v-select>
+                    </v-col>
+                    <v-col cols="4">
+                      <v-select
+                        v-model="product.byOrder"
+                        :items="byOrder"
+                        item-text="name"
+                        :item-value="`id`"
+                        label="Select is order"
+                        :rules="[v => !!v || 'By order is required']"
+                      ></v-select>
                     </v-col>
                   </v-row>
                   <v-row>
@@ -348,9 +360,10 @@ import Api from "../../../api/index";
 import Swal from "sweetalert2";
 import { isValidRole } from "../../helpers/roles";
 import { productHeader } from "../../helpers/dataTableHeaders";
-import ProductImages from '../../components/admin/productImages';
 import {languageFields} from "../../helpers/validationRequestFild";
 import {randomCode} from '../../helpers/randomCode';
+import { genders } from '../../helpers/genders';
+import ProductImages from '../../components/admin/productImages';
 
 export default {
   name: "product",
@@ -384,6 +397,7 @@ export default {
       id: 2,
     }
     ],
+    gender: genders,
     filter: {
       productCode: '',
       categoryId: null,
@@ -395,6 +409,7 @@ export default {
       categoryId: null,
       subCategoryId: null,
       byOrder: null,
+      ganderId: null,
       onlyQuantity: true,
       bag: [
         {
@@ -425,6 +440,7 @@ export default {
       categoryId: null,
       subCategoryId: null,
       byOrder: null,
+      ganderId: null,
       onlyQuantity: true,
       bag: [
         {
