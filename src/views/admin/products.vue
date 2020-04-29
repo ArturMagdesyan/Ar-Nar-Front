@@ -399,7 +399,7 @@ export default {
     ],
     gender: genders,
     filter: {
-      productCode: '',
+      productCode: null,
       categoryId: null,
       subCategoryId: null,
       byOrder: null
@@ -488,7 +488,18 @@ export default {
       val || this.close();
     },
     'pagination.page': function (newPage) {
-      this.getProducts();
+      let isFilterValid = false;
+      for (let key in this.filter) {
+        if (this.filter[key]) {
+          isFilterValid = true;
+        }
+      }
+      if (isFilterValid) {
+        this.filtered();
+      } else {
+        this.getProducts();
+      }
+
     }
   },
 
@@ -531,7 +542,7 @@ export default {
 
       filterClear() {
         this.filter = {
-          productCode: '',
+          productCode: null,
           category: null,
           subCategory: null,
           byOrder: null
@@ -585,7 +596,6 @@ export default {
           return Math.ceil(price - (price * (percentOff / 100)));
         }
       },
-      // get sub category
       getSubCategory(categoryId) {
         this.product.subCategoryId = null;
         Api.get(`/subCategories/${categoryId}`).then(res => {
@@ -598,7 +608,6 @@ export default {
           })
         });
       },
-
       getFilterSubCategory() {
         Api.get(`/subCategories/${this.filter.categoryId}`).then(res => {
           this.subCategories = res;
@@ -610,32 +619,27 @@ export default {
           })
         });
       },
-
       changeLanguageLocale(lang) {
         this.languageLocale = lang;
       },
-
       getCategoryTableName(id) {
         for (const category of this.categories) {
           if (category._id === id)
             return category[this.$store.state.language].name;
         }
       },
-
       getSubCategoryTableName(id) {
         for (const subCategory of this.subCategoriesForTable) {
           if (subCategory._id === id)
             return subCategory[this.$store.state.language].name;
         }
       },
-
       editItem(item) {
         item.files = [];
         this.editedIndex = this.products.indexOf(item);
         this.product = _.cloneDeep(item);
         this.dialog = true;
       },
-
       deleteItem(item) {
         const index = this.products.indexOf(item);
         confirm("Are you sure you want to delete this category?") &&
@@ -653,7 +657,6 @@ export default {
           })
         });
       },
-
       close() {
         this.dialog = false;
         setTimeout(() => {
@@ -662,7 +665,6 @@ export default {
           this.product = _.cloneDeep(this.defaultProduct);
         }, 300);
       },
-
       save() {
         if (this.editedIndex > -1) {
           // edit sub category
@@ -672,7 +674,6 @@ export default {
           this.saveProduct();
         }
       },
-
       getProducts() {
         Api.get(`/products?page=${this.pagination.page}&perPage=${this.pagination.perPage}`).then(res => {
           this.pagination = res.pagination;
@@ -685,7 +686,6 @@ export default {
           })
         });
       },
-
       editProduct() {
         const error = languageFields(this.product);
         if(error) {
@@ -724,7 +724,6 @@ export default {
             });
           });
       },
-
       saveProduct() {
         const error = languageFields(this.product);
         if(error) {

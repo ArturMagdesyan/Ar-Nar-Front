@@ -207,7 +207,7 @@ export default {
           margin-bottom: 15px;
         }
         .view-image {
-          width: 10%;
+          width: 17%;
           margin-right: 10px;
           display: flex;
           flex-wrap: wrap;
