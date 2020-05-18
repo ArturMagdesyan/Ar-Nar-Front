@@ -3,6 +3,7 @@ import VueRouter from 'vue-router';
 import store from "../store/index";
 // front
 import Home from "../views/front/home";
+import Catalog from "../views/front/catalog";
 // admin
 import AdminHome from "../views/admin/home"
 import AdminCategories from "../views/admin/categories"
@@ -19,6 +20,11 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home
+  },
+  {
+    path: '/c/:page',
+    name: 'Catalog',
+    component: Catalog
   },
   {
     path: '/adm',

@@ -2,17 +2,21 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import createPersistedState from "vuex-persistedstate";
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    currency: 'rub',
+    language: 'ru',
     isLoggedAdmin: false,
-    language: 'hy',
     adminUser: null,
   },
   mutations: {
     setLanguage(state, lang) {
       state.language = lang;
+    },
+    setCurrency(state, currency) {
+      state.currency = currency;
     },
     login(state, adminUser) {
       state.adminUser = adminUser;
@@ -32,6 +36,9 @@ export default new Vuex.Store({
     logout({commit, state}) {
       state.isLoggedAdmin = false;
       commit('logout');
+    },
+    setCurrency({commit}, currency) {
+      commit('setCurrency', currency);
     }
   },
   modules: {},

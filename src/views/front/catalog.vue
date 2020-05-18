@@ -1,15 +1,15 @@
 <template>
-  <div id="home-page">Home</div>
+  <div>
+    {{ $route.params.page }}
+  </div>
 </template>
 
 <script>
 export default {
-  name: "home"
-};
+  name: "catalog",
+}
 </script>
 
 <style scoped lang="scss">
-#home-page {
-  height: 500px;
-}
+
 </style>

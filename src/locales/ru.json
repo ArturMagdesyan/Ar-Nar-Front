@@ -1,0 +1,54 @@
+{
+  "name": "Ru",
+  "header": {
+    "contact": {
+      "text": "Если есть вопросы звоните",
+      "phone": "+37495656130",
+      "email": ""
+    },
+    "links": {
+      "women": "ЖЕНСКОЕ",
+      "men": "МУЖСКОЕ",
+      "kid": "ДЕТСКОЕ",
+      "wholesale": "ОПТАВАЯ"
+    },
+    "categories": {
+      "times": "ЧАСЫ",
+      "clothes": "ОДЕЖДА",
+      "shoes": "ОБУВЬ",
+      "ornament": "БИЖУТЕРИЯ",
+      "phone-accessories": "ТЕЛЕФОННЫЕ АКСЕССУАРЫ"
+    },
+    "search": "Найти товар"
+  },
+  "footer": {
+    "customer-service": {
+      "name": "Обслуживание клиентов",
+      "forgot-password": "Забыл пароль",
+      "security-policy": "Политика безопасности",
+      "faqs": "Вопросы и ответы",
+      "contact-info": "Контактная информация"
+    },
+    "shopping": {
+      "name": "Меню",
+      "women": "Женское",
+      "men": "Мужское",
+      "kid": "Детское",
+      "wholesale": "Оптабар"
+    },
+    "my-account": {
+      "name": "Мой счет",
+      "login-register": "Войти/Зарегистрироваться",
+      "my-account":"Мой счет",
+      "order-status": "Статус заказа",
+      "order-history": "История заказов",
+      "track-my-order": "Отслеживать свой заказ"
+    },
+    "information": {
+      "name": "Информация",
+      "about": "О нас",
+      "site-map": "Карта сайта",
+      "find-us-on": "Найти нас на:"
+    }
+  }
+}
